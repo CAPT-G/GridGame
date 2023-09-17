@@ -1,0 +1,138 @@
+import ui
+import random
+
+# Define image file paths
+image_paths = {
+    1: '1.png',
+    2: '2.png',
+    3: '3.png',
+    4: '4.png',
+    5: '5.png',
+    6: '6.png',
+    7: '7.png',
+    8: '8.png',
+    9: '9.png',
+    10: '10.png',
+    11: '11.png',
+    12: '12.png'
+}
+
+# Define image positions
+image_positions = {
+    1: [(25, 41), (32, 48)],
+    2: [(8, 49), (16, 56)],
+    3: [(17, 55), (24, 64)],
+    4: [(0, 93), (7, 96)],
+    5: [(33, 40)],
+    6: [(65, 97)],
+    7: [(69, 92)],
+    8: [(73, 98)],
+    9: [(77, 99)],
+    10: [(81, 84)],
+    11: [(85, 88)],
+    12: [(89, 91)]
+}
+
+class GridView(ui.View):
+    """
+    A custom UI view that displays a grid of buttons with images.
+    """
+
+    def __init__(self, frame):
+        """
+        Initializes the GridView.
+
+        Args:
+            frame (ui.Rect): The frame (position and size) of the view.
+        """
+        self.frame = frame
+        self.rows = 3
+        self.columns = 4
+        self.grid = [[ui.Button() for _ in range(self.columns)] for _ in range(self.rows)]
+        self.background_color = 'white'
+        cell_width = frame.width / self.columns
+        cell_height = frame.height / self.rows
+
+        for row in range(self.rows):
+            for col in range(self.columns):
+                button = self.grid[row][col]
+                button.frame = (
+                    col * cell_width,
+                    row * cell_height,
+                    cell_width,
+                    cell_height
+                )
+                button.border_width = 1
+                button.border_color = 'black'
+                self.add_subview(button)
+
+    def play_pressed(self, sender):
+        """
+        Action handler for the Play button. Generates random numbers and displays them on the grid buttons.
+
+        Args:
+            sender (ui.Button): The button that triggered this action.
+        """
+        for row in range(self.rows):
+            for col in range(self.columns):
+                self.grid[row][col].title = ""
+
+        for row in range(self.rows):
+            for col in range(self.columns):
+                # Generate a random number
+                random_number = random.randint(1, 12)
+                self.grid[row][col].title = str(random_number)
+
+                # Add image if associated with the number
+                if random_number in image_paths:
+                    image_path = image_paths[random_number]
+                    image_pos = image_positions[random_number][0]  # Take the first position
+                    image = ui.Image.named(image_path)
+                    image_view = ui.ImageView(frame=(image_pos[0], image_pos[1], 50, 50))  # Adjust the frame as needed
+                    image_view.image = image
+                    
+                    # Add the image view as a subview of the grid button
+                    self.grid[row][col].add_subview(image_view)
+
+def main():
+    """
+    Main function to create and present the UI.
+    """
+    screen_size = ui.get_screen_size()
+
+    grid_width = min(screen_size.width, screen_size.height) * 1.
+    grid_height = grid_width * 3 / 4
+
+    # Create a container view to hold the GridView
+    container_view = ui.View(frame=(0, 0, screen_size.width, screen_size.height))
+    container_view.background_color = 'white'
+
+    # Create the GridView
+    grid_view = GridView(ui.Rect(0, 0, grid_width, grid_height))
+
+    # Create the Play button
+    play_button = ui.Button(title='Play')
+    play_button_width = grid_width
+    play_button_height = 50
+    play_button.frame = (
+        (screen_size.width - play_button_width) / 2,
+        grid_height + 200,  # Below the grid
+        play_button_width,
+        play_button_height
+    )
+    play_button.border_color = 'black'
+    play_button.border_width = 1
+    play_button.corner_radius = play_button_height / 2
+
+    # Add the GridView and Play button to the container view
+    container_view.add_subview(grid_view)
+    container_view.add_subview(play_button)
+
+    play_button.action = grid_view.play_pressed
+
+    # Create a NavigationView to present the container view
+    nav_view = ui.NavigationView(container_view, bg_color='white')
+    nav_view.present('fullscreen')
+
+if __name__ == '__main__':
+    main()
